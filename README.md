@@ -159,25 +159,18 @@ MIT
 
 ## Скриншоты
 
-
-
 ### 1. Приветствие бота
-![Приветствие](screenshots/01_start.png)
 
-
+![Приветствие](https://raw.githubusercontent.com/gena-ctrl/impulse-bot/main/screenshots/01_start.png)
 
 ### 2. Проверка текста
-![Проверка текста](screenshots/02_text.png)
 
-
+![Проверка текста](https://raw.githubusercontent.com/gena-ctrl/impulse-bot/main/screenshots/02_text.png)
 
 ### 3. Распознавание фото
-![Распознавание фото](screenshots/03_photo.png)
 
-
+![Распознавание фото](https://raw.githubusercontent.com/gena-ctrl/impulse-bot/main/screenshots/03_photo.png)
 
 ### 4. Лог работы бота
-![Лог работы](screenshots/04_terminal.png)
 
-
-
+![Лог работы](https://raw.githubusercontent.com/gena-ctrl/impulse-bot/main/screenshots/04_terminal.png)
