@@ -53,35 +53,16 @@
 - BeautifulSoup
 - httpx
 
-## Скриншоты
-
-### 1. Приветствие бота
-
-![Приветствие](https://raw.githubusercontent.com/gena-ctrl/impulse-bot/main/screenshots/01_start.png)
-
-### 2. Проверка текста
-
-![Проверка текста](https://raw.githubusercontent.com/gena-ctrl/impulse-bot/main/screenshots/02_text.png)
-
-### 3. Распознавание фото
-
-![Распознавание фото](https://raw.githubusercontent.com/gena-ctrl/impulse-bot/main/screenshots/03_photo.png)
-
-### 4. Лог работы бота
-
-![Лог работы](https://raw.githubusercontent.com/gena-ctrl/impulse-bot/main/screenshots/04_terminal.png)
-
-## Демонстрация работы (Этап 2)
+## Демонстрация работы Импульса после второго этапа
 
 ### 1. Старт и интерфейс
-![Старт](screenshots/01_menu.png)
+![Старт](https://raw.githubusercontent.com/gena-ctrl/impulse-bot/main/screenshots/01_start.png)
 
 ### 2. Проверка утверждения и запрос апелляции
-![Проверка](screenshots/02_garlic_check.png)
+![Проверка](https://raw.githubusercontent.com/gena-ctrl/impulse-bot/main/screenshots/02_check.png)
 
 ### 3. Апелляция: Отказ от личного опыта (CONFIRMED)
-![Апелляция](screenshots/03_appeal_confirmed.png)
-
+![Апелляция](https://raw.githubusercontent.com/gena-ctrl/impulse-bot/main/screenshots/03_appeal.png)
 
 
 ## Контакты
