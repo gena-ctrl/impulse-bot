@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 from datetime import datetime
 
 from vkbottle.bot import Bot, Message, MessageEvent
-from vkbottle import Keyboard, KeyboardButtonColor, Callback, GroupEventType
+from vkbottle import Keyboard, KeyboardButtonColor, Callback, GroupEventType, Text
 
 from gigachat_client import ask_gigachat, appeal_gigachat
 from extractor import extract_from_url, extract_from_image
@@ -32,7 +32,13 @@ SYSTEM_PROMPT = """Ты — эксперт по доказательной ме�
 Утверждение: {claim}
 """
 
-# --- Вспомогательные функции для работы с историей (с защитой от сбоев) ---
+# --- ФУНКЦИЯ ДЛЯ СОЗДАНИЯ ГЛАВНОЙ КЛАВИАТУРЫ ---
+def get_main_keyboard():
+    kb = Keyboard(one_time=False) # one_time=False значит клавиатура не исчезнет после нажатия
+    kb.add(Text("ℹ️ Как это работает", payload={"cmd": "help"}), color=KeyboardButtonColor.PRIMARY)
+    return kb.get_json()
+
+# --- Вспомогательные функции для работы с историей ---
 def load_db():
     if not os.path.exists(DB_FILE):
         return {}
@@ -43,7 +49,6 @@ def load_db():
                 return {}
             return json.loads(content)
     except json.JSONDecodeError:
-        logger.warning("Файл appeals.json поврежден. Создан пустой.")
         return {}
 
 def save_db(data):
@@ -52,20 +57,21 @@ def save_db(data):
 
 # --- ХЕНДЛЕРЫ ---
 
-@bot.on.message(text="/start")
+@bot.on.message(text=["/start", "Старт", "Начать", "Привет"])
 async def start_handler(message: Message):
     user_states.pop(message.from_id, None)
     await message.answer(
         "👋 Привет! Я Импульс — бот для проверки информации о здоровье.\n\n"
-        "Отправь мне:\n"
-        "• текст с утверждением,\n"
-        "• ссылку на статью,\n"
-        "• скриншот публикации.\n\n"
-        "Если не согласен с выводом — нажми кнопку «Оспорить»!\n\n"
-        "⚠️ Я не заменяю врача."
+        "📌 **Что я умею:**\n"
+        "• Проверять текст на достоверность.\n"
+        "• Читать статьи по ссылкам.\n"
+        "• Распознавать текст на скриншотах.\n\n"
+        "Если не согласен с выводом — нажми кнопку «Оспорить» под моим ответом!\n\n"
+        "⚠️ Я не заменяю врача.",
+        keyboard=get_main_keyboard()
     )
 
-# --- ОБРАБОТЧИК КНОПОК (Callback) ---
+# --- ОБРАБОТЧИК КНОПОК (Callback и Reply) ---
 @bot.on.raw_event(GroupEventType.MESSAGE_EVENT, MessageEvent)
 async def button_handler(event: MessageEvent):
     if event.payload:
@@ -73,22 +79,20 @@ async def button_handler(event: MessageEvent):
         if isinstance(payload, str):
             payload = json.loads(payload)
             
+        # Обработка кнопки "Оспорить"
         if payload.get("cmd") == "dispute":
-            # Сохраняем состояние для апелляции
             user_states[event.user_id] = {
                 "state": "waiting_for_evidence",
                 "original_claim": payload.get("claim"),
                 "original_verdict": payload.get("verdict")
             }
             
-            # Убираем "часики" с кнопки
             await event.show_snackbar("Запрос на апелляцию принят")
             
-            # Отправляем сообщение пользователю
             await bot.api.messages.send(
                 peer_id=event.peer_id,
                 message=(
-                    "⚖️ Апелляция\n\n"
+                    "⚖️ **Апелляция**\n\n"
                     "Вы не согласны с выводом. Пожалуйста, отправьте мне ссылку на авторитетный источник "
                     "(ВОЗ, PubMed, Минздрав) или текст с вашими доводами.\n\n"
                     "Я проведу повторную проверку и дам развернутый ответ."
@@ -101,7 +105,23 @@ async def button_handler(event: MessageEvent):
 async def any_handler(message: Message):
     text = (message.text or "").strip()
 
-    # 1. Проверяем, не ждем ли мы аргумент для апелляции
+    # 1. Проверяем кнопку "Как это работает"
+    if message.payload:
+        payload = message.payload
+        if isinstance(payload, str):
+            payload = json.loads(payload)
+        if payload.get("cmd") == "help":
+            await message.answer(
+                "📖 **Инструкция:**\n\n"
+                "1. Отправь мне текст (например: *Витамин С лечит рак*).\n"
+                "2. Я проверю его по базам ВОЗ, Минздрава и PubMed.\n"
+                "3. Если я ошибся, нажми кнопку «Оспорить» и пришли свой источник.\n\n"
+                "✍️ Напиши любое утверждение, чтобы начать проверку!",
+                keyboard=get_main_keyboard()
+            )
+            return
+
+    # 2. Проверяем, не ждем ли мы аргумент для апелляции
     user_id = message.from_id
     if user_id in user_states and user_states[user_id]["state"] == "waiting_for_evidence":
         if not text and not message.attachments:
@@ -109,7 +129,7 @@ async def any_handler(message: Message):
         await process_appeal(message, text)
         return
 
-    # 2. Обработка фото (OCR)
+    # 3. Обработка фото (OCR)
     if message.attachments:
         for att in message.attachments:
             if att.photo:
@@ -133,7 +153,7 @@ async def any_handler(message: Message):
                     await message.answer(f"⚠️ Ошибка обработки фото.")
                 return
 
-    # 3. Обработка ссылок
+    # 4. Обработка ссылок
     if text.startswith("http://") or text.startswith("https://"):
         await message.answer("⏳ Загружаю статью по ссылке...")
         try:
@@ -149,18 +169,23 @@ async def any_handler(message: Message):
             await message.answer(f"⚠️ Ошибка обработки ссылки.")
         return
 
-    # 4. Обработка обычного текста
+    # 5. Обработка обычного текста
     if not text or text.startswith("/"):
         return
 
+    # Если текст слишком короткий (просто "привет", "ок" и т.д.), не отправляем в ИИ
+    if len(text) < 10:
+        await message.answer("Пожалуйста, напишите развернутое медицинское утверждение, которое нужно проверить.", keyboard=get_main_keyboard())
+        return
+
     logger.info(f"Получено: {text[:80]}")
-    await message.answer("⏳ Отправляю в GigaChat...")
+    await message.answer("⏳ Отправляю в GigaChat...", keyboard=get_main_keyboard())
     
     try:
         answer = await ask_gigachat(SYSTEM_PROMPT.format(claim=text))
     except Exception as e:
         logger.error(f"Ошибка GigaChat: {e}")
-        await message.answer("⚠️ Ошибка при обращении к GigaChat. Попробуйте позже.")
+        await message.answer("⚠️ Ошибка при обращении к GigaChat. Попробуйте позже.", keyboard=get_main_keyboard())
         return
 
     await send_result_with_button(message, answer, text[:50])
@@ -171,6 +196,7 @@ async def send_result_with_button(message: Message, answer: str, claim_short: st
     if "ВЕРДИКТ:" in answer:
         verdict_short = answer.split("ВЕРДИКТ:")[1].split("\n")[0].strip()
 
+    # Инлайн-кнопка "Оспорить"
     kb = Keyboard(inline=True)
     kb.add(Callback("❌ Оспорить", payload={"cmd": "dispute", "claim": claim_short, "verdict": verdict_short}), color=KeyboardButtonColor.NEGATIVE)
     
@@ -186,7 +212,6 @@ async def process_appeal(message: Message, new_material: str):
     
     del user_states[user_id]
     
-    # Если пользователь прислал ссылку — вытаскиваем текст
     if new_material.startswith("http"):
         await message.answer("⏳ Загружаю статью по вашей ссылке...")
         extracted_text = await extract_from_url(new_material)
@@ -201,7 +226,6 @@ async def process_appeal(message: Message, new_material: str):
     explanation = result.get("explanation", "")
     what_changed = result.get("what_changed", "")
     
-    # Сохраняем в историю
     db = load_db()
     appeal_id = str(datetime.now().timestamp())
     db[appeal_id] = {
@@ -234,7 +258,7 @@ async def process_appeal(message: Message, new_material: str):
     if status == "INSUFFICIENT":
         response_text += "\n\n👨‍⚕️ Ваш запрос передан на проверку эксперту. (В прототипе это имитация)"
 
-    await message.answer(response_text)
+    await message.answer(response_text, keyboard=get_main_keyboard())
 
 # --- ЗАПУСК БОТА ---
 if __name__ == "__main__":
