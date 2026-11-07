@@ -71,6 +71,19 @@
 
 ![Лог работы](https://raw.githubusercontent.com/gena-ctrl/impulse-bot/main/screenshots/04_terminal.png)
 
+## Демонстрация работы (Этап 2)
+
+### 1. Старт и интерфейс
+![Старт](screenshots/01_menu.png)
+
+### 2. Проверка утверждения и запрос апелляции
+![Проверка](screenshots/02_garlic_check.png)
+
+### 3. Апелляция: Отказ от личного опыта (CONFIRMED)
+![Апелляция](screenshots/03_appeal_confirmed.png)
+
+
+
 ## Контакты
 
 Команда «Импульс», кейс «Правда под вопросом», 2026 г.
