@@ -1,6 +1,6 @@
 # Импульс — бот для проверки информации о здоровье
 
-Бот во ВКонтакте, который помогает отличать достоверные медицинские утверждения от дезинформации.
+Бот во ВКонтакте, который помогает отличать достоверные медицинские утверждения от дезинформации; также может опровергнуть утверждение пользователя.
 
 ## Проблема
 
@@ -53,18 +53,16 @@
 - BeautifulSoup
 - httpx
 
-## Демонстрация работы Импульса после второго этапа
+## Демонстрация работы (Этап 2)
 
 ### 1. Старт и интерфейс
-![Старт](https://raw.githubusercontent.com/gena-ctrl/impulse-bot/main/screenshots/01_start.png)
+![Старт](https://raw.githubusercontent.com/gena-ctrl/impulse-bot/main/screenshots/start_v2.png)
 
 ### 2. Проверка утверждения и запрос апелляции
-![Проверка](https://raw.githubusercontent.com/gena-ctrl/impulse-bot/main/screenshots/02_check.png)
+![Проверка](https://raw.githubusercontent.com/gena-ctrl/impulse-bot/main/screenshots/check_v2.png)
 
 ### 3. Апелляция: Отказ от личного опыта (CONFIRMED)
-![Апелляция](https://raw.githubusercontent.com/gena-ctrl/impulse-bot/main/screenshots/03_appeal.png)
-
-
+![Апелляция](https://raw.githubusercontent.com/gena-ctrl/impulse-bot/main/screenshots/appeal_v2.png)
 ## Контакты
 
 Команда «Импульс» – ГАПОУ АО "Архангельский медицинский колледж", 2026 г.
